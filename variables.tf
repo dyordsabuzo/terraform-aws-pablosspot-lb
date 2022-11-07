@@ -9,11 +9,6 @@ variable "base_domain" {
   description = "Base domain"
 }
 
-variable "application_port" {
-  type        = number
-  description = "Application container port"
-}
-
 variable "target_type" {
   type        = string
   description = "Target type for load balancer target group"
@@ -41,4 +36,9 @@ variable "ssl_policy" {
   type        = string
   description = "SSL policy for the load balancer listener"
   default     = "ELBSecurityPolicy-2016-08"
+}
+
+variable "endpoints" {
+  description = "List of endpoints that will expose the load balancer"
+  type        = list(any)
 }

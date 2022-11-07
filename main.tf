@@ -61,41 +61,11 @@ resource "aws_lb_listener" "listener" {
   certificate_arn   = data.aws_acm_certificate.cert.arn
 }
 
-resource "aws_lb_listener_rule" "rule" {
-  listener_arn = aws_lb_listener.listener.arn
-  priority     = 10
-
-  condition {
-    host_header {
-      values = ["${var.system_name}.${var.base_domain}"]
-    }
-  }
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.target.arn
-  }
-}
-
-resource "aws_lb_target_group" "target" {
-  name        = "${var.system_name}-${terraform.workspace}"
-  protocol    = "HTTP"
-  port        = var.application_port
-  vpc_id      = aws_default_vpc.default.id
-  target_type = var.target_type
-
-  health_check {
-    protocol            = "HTTP"
-    interval            = 10
-    unhealthy_threshold = 6
-    matcher             = "200,301-399"
-  }
-}
-
 resource "aws_route53_record" "record" {
-  zone_id = data.aws_route53_zone.zone.zone_id
-  name    = var.system_name
-  type    = "A"
+  for_each = toset(var.endpoints)
+  zone_id  = data.aws_route53_zone.zone.zone_id
+  name     = each.key
+  type     = "A"
 
   alias {
     name                   = aws_lb.lb.dns_name
