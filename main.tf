@@ -77,25 +77,11 @@ resource "aws_lb_listener_rule" "rule" {
   }
 }
 
-resource "aws_lb_target_group" "target" {
-  name        = "${var.system_name}-${terraform.workspace}"
-  protocol    = "HTTP"
-  port        = var.application_port
-  vpc_id      = aws_default_vpc.default.id
-  target_type = var.target_type
-
-  health_check {
-    protocol            = "HTTP"
-    interval            = 10
-    unhealthy_threshold = 6
-    matcher             = "200,301-399"
-  }
-}
-
 resource "aws_route53_record" "record" {
-  zone_id = data.aws_route53_zone.zone.zone_id
-  name    = var.system_name
-  type    = "A"
+  for_each = toset(var.endpoints)
+  zone_id  = data.aws_route53_zone.zone.zone_id
+  name     = each.key
+  type     = "A"
 
   alias {
     name                   = aws_lb.lb.dns_name
