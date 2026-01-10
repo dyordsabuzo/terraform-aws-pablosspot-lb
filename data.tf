@@ -10,7 +10,6 @@ data "aws_subnets" "public_subnets" {
 }
 
 data "aws_acm_certificate" "cert" {
-  count       = try(var.endpoint.aws_dns, false) ? 1 : 0
   domain      = var.endpoint.base_domain
   statuses    = ["ISSUED"]
   most_recent = true
