@@ -37,9 +37,13 @@ variable "ssl_policy" {
   default     = "ELBSecurityPolicy-TLS13-1-2-2021-06"
 }
 
-variable "endpoints" {
-  description = "List of endpoints that will expose the load balancer"
-  type        = list(any)
+variable "endpoint" {
+  description = "Endpoint that will expose the load balancer"
+  type = object({
+    value       = string
+    base_domain = string
+    aws_dns     = optional(bool)
+  })
 }
 
 variable "idle_timeout" {

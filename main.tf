@@ -72,10 +72,10 @@ resource "aws_lb_listener" "http_redirect_listener" {
 }
 
 resource "aws_route53_record" "record" {
-  for_each = toset(var.endpoints)
-  zone_id  = data.aws_route53_zone.zone.zone_id
-  name     = each.key
-  type     = "A"
+  count   = try(var.endpoint.aws_dns, false) ? 1 : 0
+  zone_id = data.aws_route53_zone.zone.zone_id
+  name    = var.endpoint.value
+  type    = "A"
 
   alias {
     name                   = aws_lb.lb.dns_name
