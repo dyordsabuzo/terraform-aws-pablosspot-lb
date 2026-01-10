@@ -53,7 +53,7 @@ resource "aws_lb_listener" "listener" {
   load_balancer_arn = aws_lb.lb.arn
   port              = 443
   ssl_policy        = var.ssl_policy
-  certificate_arn   = data.aws_acm_certificate.cert.arn
+  certificate_arn   = data.aws_acm_certificate.cert[0].arn
 }
 
 resource "aws_lb_listener" "http_redirect_listener" {
@@ -73,7 +73,7 @@ resource "aws_lb_listener" "http_redirect_listener" {
 
 resource "aws_route53_record" "record" {
   count   = try(var.endpoint.aws_dns, false) ? 1 : 0
-  zone_id = data.aws_route53_zone.zone.zone_id
+  zone_id = data.aws_route53_zone.zone[0].zone_id
   name    = var.endpoint.value
   type    = "A"
 
