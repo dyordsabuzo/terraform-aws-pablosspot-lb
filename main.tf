@@ -53,7 +53,7 @@ resource "aws_lb_listener" "listener" {
   load_balancer_arn = aws_lb.lb.arn
   port              = 443
   ssl_policy        = var.ssl_policy
-  certificate_arn   = data.aws_acm_certificate.cert.arn
+  certificate_arn   = var.certificate_arn
 }
 
 resource "aws_lb_listener" "http_redirect_listener" {

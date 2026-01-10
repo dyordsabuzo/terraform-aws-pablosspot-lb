@@ -58,3 +58,8 @@ variable "security_group_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "certificate_arn" {
+  description = "AWS ACM arn to attach to load balancer"
+  type        = string
+}
