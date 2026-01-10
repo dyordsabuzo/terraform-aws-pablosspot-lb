@@ -4,20 +4,14 @@ variable "region" {
   default     = "ap-southeast-2"
 }
 
-variable "base_domain" {
+variable "environment_name" {
   type        = string
-  description = "Base domain"
+  description = "Environment name"
 }
 
-variable "target_type" {
+variable "vpc_id" {
   type        = string
-  description = "Target type for load balancer target group"
-  default     = "ip"
-}
-
-variable "system_name" {
-  type        = string
-  description = "System name"
+  description = "ID of vpc where resources will be created"
 }
 
 variable "internal" {
@@ -32,13 +26,36 @@ variable "load_balancer_type" {
   default     = "application"
 }
 
+variable "base_domain" {
+  type        = string
+  description = "Base domain"
+}
+
 variable "ssl_policy" {
   type        = string
   description = "SSL policy for the load balancer listener"
-  default     = "ELBSecurityPolicy-2016-08"
+  default     = "ELBSecurityPolicy-TLS13-1-2-2021-06"
 }
 
 variable "endpoints" {
   description = "List of endpoints that will expose the load balancer"
   type        = list(any)
+}
+
+variable "idle_timeout" {
+  description = "Load balancer idle timeout"
+  type        = number
+  default     = 60
+}
+
+variable "access_log_bucket" {
+  description = "S3 bucket to store access logs"
+  type        = string
+  default     = null
+}
+
+variable "security_group_ids" {
+  description = "List of security groups to attach to the lb"
+  type        = list(string)
+  default     = []
 }

@@ -1,25 +1,28 @@
 resource "aws_lb" "lb" {
-  name               = "${var.system_name}-lb-${terraform.workspace}"
+  name               = "${var.environment_name}-${terraform.workspace}-lb"
   internal           = var.internal
   load_balancer_type = var.load_balancer_type
-  security_groups    = [aws_security_group.lb_sg.id]
-  subnets            = data.aws_subnet_ids.subnets.ids
+  security_groups    = compact(concat([aws_security_group.lb_sg.id], var.security_group_ids))
+  subnets            = var.vpc_id != null ? data.aws_subnets.public_subnets.ids : data.aws_subnet_ids.subnets.ids
+  idle_timeout       = var.idle_timeout
+
+  dynamic "access_logs" {
+    for_each = var.access_log_bucket != null ? 1 : 0
+    content {
+      bucket  = var.access_log_bucket
+      prefix  = "elblogs-${var.environment_name}-lb-${terraform.workspace}"
+      enabled = true
+    }
+  }
 }
 
 resource "aws_security_group" "lb_sg" {
-  name        = "${var.system_name}-${terraform.workspace}"
-  description = "Load balancer security firewall"
+  name        = "${var.environment_name}-${terraform.workspace}"
+  description = "Default load balancer security firewall"
 
   ingress {
     from_port   = 443
     to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -32,15 +35,7 @@ resource "aws_security_group" "lb_sg" {
   }
 
   tags = {
-    Name = "${var.system_name}-${terraform.workspace}"
-  }
-}
-
-resource "aws_default_vpc" "default" {
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
+    Name = "${var.environment_name}-${terraform.workspace}"
   }
 }
 
@@ -61,6 +56,21 @@ resource "aws_lb_listener" "listener" {
   certificate_arn   = data.aws_acm_certificate.cert.arn
 }
 
+resource "aws_lb_listener" "http_redirect_listener" {
+  load_balancer_arn = aws_lb.lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
 resource "aws_route53_record" "record" {
   for_each = toset(var.endpoints)
   zone_id  = data.aws_route53_zone.zone.zone_id
@@ -74,17 +84,10 @@ resource "aws_route53_record" "record" {
   }
 }
 
-resource "aws_lb_listener" "http_listner" {
-  load_balancer_arn = aws_lb.lb.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type = "redirect"
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
+resource "aws_default_vpc" "default" {
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }
