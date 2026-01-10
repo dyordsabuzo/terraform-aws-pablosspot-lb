@@ -7,7 +7,7 @@ resource "aws_lb" "lb" {
   idle_timeout       = var.idle_timeout
 
   dynamic "access_logs" {
-    for_each = var.access_log_bucket != null ? 1 : 0
+    for_each = var.access_log_bucket != null ? [1] : []
     content {
       bucket  = var.access_log_bucket
       prefix  = "elblogs-${var.environment_name}-lb-${terraform.workspace}"
