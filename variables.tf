@@ -26,11 +26,6 @@ variable "load_balancer_type" {
   default     = "application"
 }
 
-variable "base_domain" {
-  type        = string
-  description = "Base domain"
-}
-
 variable "ssl_policy" {
   type        = string
   description = "SSL policy for the load balancer listener"
