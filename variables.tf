@@ -63,3 +63,27 @@ variable "certificate_arn" {
   description = "AWS ACM arn to attach to load balancer"
   type        = string
 }
+
+variable "ingress_cidr_ipv4_list" {
+  description = "List of IPV4 CIDR blocks where LB ingress is allowed"
+  type        = list(string)
+  default     = []
+}
+
+variable "ingress_cidr_ipv6_list" {
+  description = "List of IPV6 CIDR blocks where LB ingress is allowed"
+  type        = list(string)
+  default     = []
+}
+
+variable "egress_cidr_ipv4_list" {
+  description = "List of IPV4 CIDR blocks where LB egress is allowed"
+  type        = list(string)
+  default     = []
+}
+
+variable "egress_cidr_ipv6_list" {
+  description = "List of IPV6 CIDR blocks where LB egress is allowed"
+  type        = list(string)
+  default     = []
+}
