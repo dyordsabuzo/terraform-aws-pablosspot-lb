@@ -1,7 +1,3 @@
-data "aws_subnet_ids" "subnets" {
-  vpc_id = aws_default_vpc.default.id
-}
-
 data "aws_subnets" "public_subnets" {
   filter {
     name   = "vpc-id"

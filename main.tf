@@ -3,7 +3,7 @@ resource "aws_lb" "lb" {
   internal           = var.internal
   load_balancer_type = var.load_balancer_type
   security_groups    = compact(concat([aws_security_group.lb_sg.id], var.security_group_ids))
-  subnets            = var.vpc_id != null ? data.aws_subnets.public_subnets.ids : data.aws_subnet_ids.subnets.ids
+  subnets            = data.aws_subnets.public_subnets.ids
   idle_timeout       = var.idle_timeout
 
   dynamic "access_logs" {
@@ -81,13 +81,5 @@ resource "aws_route53_record" "record" {
     name                   = aws_lb.lb.dns_name
     zone_id                = aws_lb.lb.zone_id
     evaluate_target_health = true
-  }
-}
-
-resource "aws_default_vpc" "default" {
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
   }
 }
