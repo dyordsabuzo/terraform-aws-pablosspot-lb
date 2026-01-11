@@ -31,6 +31,7 @@ resource "aws_security_group" "lb_sg" {
 
 resource "aws_vpc_security_group_ingress_rule" "tls_ipv4" {
   for_each          = toset(var.ingress_cidr_ipv4_list)
+  description       = "Ingress rule for TLS traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv4         = each.value
   from_port         = 443
@@ -41,6 +42,7 @@ resource "aws_vpc_security_group_ingress_rule" "tls_ipv4" {
 
 resource "aws_vpc_security_group_ingress_rule" "tls_ipv6" {
   for_each          = toset(var.ingress_cidr_ipv6_list)
+  description       = "Ingress rule for TLS traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv6         = each.value
   from_port         = 443
@@ -51,6 +53,7 @@ resource "aws_vpc_security_group_ingress_rule" "tls_ipv6" {
 
 resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv4" {
   for_each          = toset(var.egress_cidr_ipv4_list)
+  description       = "Egress rule for all traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv4         = each.value
   ip_protocol       = "-1"
@@ -59,6 +62,7 @@ resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv4" {
 
 resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv6" {
   for_each          = toset(var.egress_cidr_ipv6_list)
+  description       = "Egress rule for all traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv6         = each.value
   ip_protocol       = "-1"
