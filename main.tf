@@ -23,6 +23,7 @@ resource "aws_lb" "lb" {
 resource "aws_security_group" "lb_sg" {
   name        = "${var.environment_name}-${terraform.workspace}"
   description = "Default load balancer security firewall"
+  vpc_id      = var.vpc_id
 
   tags = merge(local.tags, {
     Name = "${var.environment_name}-${terraform.workspace}"
