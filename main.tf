@@ -3,7 +3,7 @@ resource "aws_lb" "lb" {
   name                       = "${var.environment_name}-${terraform.workspace}-lb"
   internal                   = var.internal
   load_balancer_type         = var.load_balancer_type
-  security_groups            = compact(concat([aws_security_group.lb_sg.id], var.security_group_ids))
+  security_groups            = compact(concat([aws_security_group.lb_sg.id], try(coalesce(var.firewall_setting.security_groups, []))))
   subnets                    = data.aws_subnets.subnets.ids
   idle_timeout               = var.idle_timeout
   drop_invalid_header_fields = true
@@ -31,7 +31,7 @@ resource "aws_security_group" "lb_sg" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "tls_ipv4" {
-  for_each          = toset(var.ingress_cidr_ipv4_list)
+  for_each          = toset(try(coalesce(var.firewall_setting.inbound.cidr_ipv4, []), []))
   description       = "Ingress rule for TLS traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv4         = each.value
@@ -42,7 +42,7 @@ resource "aws_vpc_security_group_ingress_rule" "tls_ipv4" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "tls_ipv6" {
-  for_each          = toset(var.ingress_cidr_ipv6_list)
+  for_each          = toset(try(coalesce(var.firewall_setting.inbound.cidr_ipv6, []), []))
   description       = "Ingress rule for TLS traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv6         = each.value
@@ -53,7 +53,7 @@ resource "aws_vpc_security_group_ingress_rule" "tls_ipv6" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv4" {
-  for_each          = toset(var.egress_cidr_ipv4_list)
+  for_each          = toset(try(var.firewall_setting.outbound.cidr_ipv4, []))
   description       = "Egress rule for all traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv4         = each.value
@@ -62,7 +62,7 @@ resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv4" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv6" {
-  for_each          = toset(var.egress_cidr_ipv6_list)
+  for_each          = toset(try(var.firewall_setting.outbound.cidr_ipv6, []))
   description       = "Egress rule for all traffic - ${each.value}"
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv6         = each.value

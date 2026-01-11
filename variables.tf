@@ -58,26 +58,18 @@ variable "certificate_arn" {
   type        = string
 }
 
-variable "ingress_cidr_ipv4_list" {
-  description = "List of IPV4 CIDR blocks where LB ingress is allowed"
-  type        = list(string)
-  default     = []
-}
-
-variable "ingress_cidr_ipv6_list" {
-  description = "List of IPV6 CIDR blocks where LB ingress is allowed"
-  type        = list(string)
-  default     = []
-}
-
-variable "egress_cidr_ipv4_list" {
-  description = "List of IPV4 CIDR blocks where LB egress is allowed"
-  type        = list(string)
-  default     = []
-}
-
-variable "egress_cidr_ipv6_list" {
-  description = "List of IPV6 CIDR blocks where LB egress is allowed"
-  type        = list(string)
-  default     = []
+variable "firewall_setting" {
+  description = "Inbound, outbound and security group attachments to the load balancer"
+  type = object({
+    inbound = object({
+      cidr_ipv4 = optional(list(string))
+      cidr_ipv6 = optional(list(string))
+    })
+    outbound = object({
+      cidr_ipv4 = optional(list(string))
+      cidr_ipv6 = optional(list(string))
+    })
+    security_groups = optional(list(string))
+  })
+  default = null
 }
