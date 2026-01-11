@@ -1,11 +1,11 @@
-data "aws_subnets" "public_subnets" {
+data "aws_subnets" "subnets" {
   filter {
     name   = "vpc-id"
     values = [var.vpc_id]
   }
 
   tags = {
-    role = "public"
+    role = var.internal ? "private" : "public"
   }
 }
 

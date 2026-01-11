@@ -1,9 +1,10 @@
+#tfsec:ignore:aws-elb-alb-not-public:exp:2026-02-01
 resource "aws_lb" "lb" {
   name                       = "${var.environment_name}-${terraform.workspace}-lb"
   internal                   = var.internal
   load_balancer_type         = var.load_balancer_type
   security_groups            = compact(concat([aws_security_group.lb_sg.id], var.security_group_ids))
-  subnets                    = data.aws_subnets.public_subnets.ids
+  subnets                    = data.aws_subnets.subnets.ids
   idle_timeout               = var.idle_timeout
   drop_invalid_header_fields = true
 
@@ -15,15 +16,17 @@ resource "aws_lb" "lb" {
       enabled = true
     }
   }
+
+  tags = local.tags
 }
 
 resource "aws_security_group" "lb_sg" {
   name        = "${var.environment_name}-${terraform.workspace}"
   description = "Default load balancer security firewall"
 
-  tags = {
+  tags = merge(local.tags, {
     Name = "${var.environment_name}-${terraform.workspace}"
-  }
+  })
 }
 
 resource "aws_vpc_security_group_ingress_rule" "tls_ipv4" {
@@ -33,6 +36,7 @@ resource "aws_vpc_security_group_ingress_rule" "tls_ipv4" {
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
+  tags              = local.tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "tls_ipv6" {
@@ -42,6 +46,7 @@ resource "aws_vpc_security_group_ingress_rule" "tls_ipv6" {
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
+  tags              = local.tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv4" {
@@ -49,6 +54,7 @@ resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv4" {
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv4         = each.value
   ip_protocol       = "-1"
+  tags              = local.tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv6" {
@@ -56,6 +62,7 @@ resource "aws_vpc_security_group_egress_rule" "all_traffic_ipv6" {
   security_group_id = aws_security_group.lb_sg.id
   cidr_ipv6         = each.value
   ip_protocol       = "-1"
+  tags              = local.tags
 }
 
 resource "aws_lb_listener" "listener" {
@@ -73,6 +80,7 @@ resource "aws_lb_listener" "listener" {
   port              = 443
   ssl_policy        = var.ssl_policy
   certificate_arn   = var.certificate_arn
+  tags              = local.tags
 }
 
 resource "aws_lb_listener" "http_redirect_listener" {
@@ -88,6 +96,8 @@ resource "aws_lb_listener" "http_redirect_listener" {
       status_code = "HTTP_301"
     }
   }
+
+  tags = local.tags
 }
 
 resource "aws_route53_record" "record" {
